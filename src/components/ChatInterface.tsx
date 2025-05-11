@@ -149,13 +149,8 @@ const ChatInterface: React.FC = () => {
                             try {
                                 if (line.startsWith('data: ')) {
                                     const data = line.slice(5).trim();
-                                    if (data === '[DONE]') continue;
-
-                                    const parsedData = JSON.parse(data);
-                                    // 处理解析后的数据...
+                                    if (data === '[DONE]') continue
                                 } else {
-                                    const parsedData = JSON.parse(line);
-                                    // 处理解析后的数据...
                                 }
                             } catch (lineError) {
                                 console.error('解析行数据失败:', line);
