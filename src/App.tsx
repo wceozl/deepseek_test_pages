@@ -1,7 +1,7 @@
 import React from 'react';
 import { ApolloProvider } from '@apollo/client';
 import apolloClient from './api/apollo';
-import GraphQLDemo from './components/graphQLDemo';
+import ChatInterface from './components/ChatInterface';
 import './App.css';
 
 function App() {
@@ -10,10 +10,10 @@ function App() {
       <div className="App">
         <header className="App-header">
           <h1>GlyphScript</h1>
-          <p>API集成演示 - GraphQL</p>
+          <p>DeepSeek API 演示</p>
         </header>
         <main className="App-main">
-          <GraphQLDemo />
+          <ChatInterface />
         </main>
         <footer className="App-footer">
           <p>&copy; {new Date().getFullYear()} glyphscript.site</p>
