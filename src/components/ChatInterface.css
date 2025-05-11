@@ -61,6 +61,18 @@
     align-self: flex-end;
     flex-direction: row-reverse;
   }
+  .message.user .markdown-content code {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #f0f0f0;
+  }
+  .message.user .markdown-content pre {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+  
+  .message.user .markdown-content a {
+    color: #ffffff;
+    text-decoration: underline;
+  }
   
   .message.assistant {
     align-self: flex-start;
@@ -85,16 +97,17 @@
   }
   
   .message-content {
-    padding: 15px 20px; /* 增加内边距 */
+    padding: 12px 16px;
     border-radius: 18px;
     background-color: #f0f0f0;
     color: #333;
     font-size: 1rem;
-    line-height: 1.6; /* 增加行高 */
+    line-height: 1.6;
     word-break: break-word;
     white-space: pre-wrap;
-    text-align: left; /* 确保文本左对齐 */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    max-width: 100%; /* 确保内容不会溢出 */
+    overflow-x: auto; /* 添加水平滚动条，适用于代码块等宽内容 */
   }
   
   .message.user .message-content {
@@ -107,6 +120,10 @@
   .message.assistant .message-content {
     background-color: #f0f0f0;
     border-bottom-left-radius: 5px;
+  }
+  .message.assistant {
+    align-self: flex-start;
+    max-width: 85%; /* 增加宽度 */
   }
   
   .typing-indicator {
@@ -216,4 +233,155 @@
     0%, 20% { content: '.'; }
     40% { content: '..'; }
     60%, 100% { content: '...'; }
+  }
+  /* 在现有样式的基础上添加以下内容 */
+
+/* Markdown 内容样式 */
+.markdown-content {
+    width: 100%;
+    line-height: 1.6;
+    overflow-wrap: break-word;
+  }
+  
+  /* 标题样式 */
+  .markdown-content h1,
+  .markdown-content h2,
+  .markdown-content h3,
+  .markdown-content h4,
+  .markdown-content h5,
+  .markdown-content h6 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  
+  .markdown-content h1 { font-size: 1.5em; }
+  .markdown-content h2 { font-size: 1.3em; }
+  .markdown-content h3 { font-size: 1.15em; }
+  .markdown-content h4 { font-size: 1.05em; }
+  .markdown-content h5 { font-size: 1em; }
+  .markdown-content h6 { font-size: 0.95em; }
+  
+  /* 段落和文本样式 */
+  .markdown-content p,
+  .markdown-content ul,
+  .markdown-content ol {
+    margin-top: 0;
+    margin-bottom: 1em;
+  }
+  
+  /* 列表样式 */
+  .markdown-content ul,
+  .markdown-content ol {
+    padding-left: 2em;
+  }
+  
+  .markdown-content li + li {
+    margin-top: 0.25em;
+  }
+  
+  /* 链接样式 */
+  .markdown-content a {
+    color: #0070f3;
+    text-decoration: none;
+  }
+  
+  .markdown-content a:hover {
+    text-decoration: underline;
+  }
+  
+  /* 代码块样式 */
+  .markdown-content pre {
+    margin: 1em 0;
+    padding: 1em;
+    overflow: auto;
+    background-color: #f6f8fa;
+    border-radius: 6px;
+    font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+    font-size: 0.9em;
+  }
+  
+  /* 行内代码样式 */
+  .markdown-content code {
+    padding: 0.2em 0.4em;
+    margin: 0;
+    background-color: rgba(27, 31, 35, 0.05);
+    border-radius: 3px;
+    font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+    font-size: 0.9em;
+  }
+  
+  .markdown-content pre code {
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+    border: 0;
+    word-break: normal;
+    white-space: pre;
+  }
+  
+  /* 表格样式 */
+  .markdown-content table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+    overflow: auto;
+  }
+  
+  .markdown-content table th,
+  .markdown-content table td {
+    padding: 6px 13px;
+    border: 1px solid #dfe2e5;
+  }
+  
+  .markdown-content table tr {
+    background-color: #fff;
+  }
+  
+  .markdown-content table tr:nth-child(2n) {
+    background-color: #f6f8fa;
+  }
+  
+  .markdown-content table th {
+    font-weight: 600;
+    background-color: #f6f8fa;
+  }
+  
+  /* 引用样式 */
+  .markdown-content blockquote {
+    margin: 1em 0;
+    padding: 0 1em;
+    color: #6a737d;
+    border-left: 0.25em solid #dfe2e5;
+  }
+  
+  .markdown-content blockquote > :first-child {
+    margin-top: 0;
+  }
+  
+  .markdown-content blockquote > :last-child {
+    margin-bottom: 0;
+  }
+  
+  /* 水平线样式 */
+  .markdown-content hr {
+    height: 0.25em;
+    padding: 0;
+    margin: 1.5em 0;
+    background-color: #e1e4e8;
+    border: 0;
+  }
+  
+  /* 图片样式 */
+  .markdown-content img {
+    max-width: 100%;
+    box-sizing: content-box;
+    background-color: #fff;
+  }
+  
+  /* 任务列表样式 */
+  .markdown-content input[type="checkbox"] {
+    margin-right: 0.5em;
+    vertical-align: middle;
   }

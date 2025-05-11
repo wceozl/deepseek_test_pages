@@ -1,5 +1,9 @@
-// src/components/ChatInterface.tsx
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
+import 'highlight.js/styles/github.css'; // 引入代码高亮样式
 import './ChatInterface.css';
 
 interface ChatMessage {
@@ -20,7 +24,6 @@ const ChatInterface: React.FC = () => {
   
   // 自动滚动到最新消息
   useEffect(() => {
-    console.log('消息数组已更新:', messages);
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
@@ -34,13 +37,11 @@ const ChatInterface: React.FC = () => {
 
   // 辅助函数：更新助手消息
   const updateAssistantMessage = (content: string) => {
-    console.log('更新助手消息, 内容长度:', content.length);
     setMessages(prev => {
       const newMessages = [...prev];
       // 更新最后一条消息，如果是助手消息
       if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
         newMessages[newMessages.length - 1].content = content;
-        console.log('助手消息已更新');
       } else {
         console.log('未找到助手消息进行更新, 消息数组:', newMessages);
       }
@@ -68,7 +69,6 @@ const ChatInterface: React.FC = () => {
         .filter(msg => msg.role !== 'system' || messages.indexOf(msg) === 0)
         .concat(userMessage);
       
-      console.log('发送消息到API:', JSON.stringify(apiMessages));
       
       // 使用流式 API
       const response = await fetch('https://api.glyphscript.site/chat/stream', {
@@ -97,13 +97,11 @@ const ChatInterface: React.FC = () => {
       let accumulatedContent = '';
       let buffer = '';
       
-      console.log('开始读取流');
       
       while (true) {
         const { done, value } = await reader.read();
         
         if (done) {
-          console.log('流读取完成, 最终内容长度:', accumulatedContent.length);
           // 确保最后一次更新消息内容
           updateAssistantMessage(accumulatedContent);
           break;
@@ -111,7 +109,6 @@ const ChatInterface: React.FC = () => {
         
         // 解码数据块
         const chunk = decoder.decode(value, { stream: true });
-        console.log('收到数据块, 长度:', chunk.length);
         
         // 将新数据添加到缓冲区
         buffer += chunk;
@@ -130,7 +127,6 @@ const ChatInterface: React.FC = () => {
             
             // 检查是否为流式响应结束标记
             if (data === '[DONE]') {
-              console.log('收到流结束标记');
               continue;
             }
             
@@ -201,7 +197,6 @@ const ChatInterface: React.FC = () => {
     setError(null);
   };
   
-  // 渲染部分保持不变
   return (
     <div className="chat-container">
       <div className="chat-header">
@@ -219,9 +214,23 @@ const ChatInterface: React.FC = () => {
                 {msg.role === 'user' ? '👤' : '🤖'}
               </div>
               <div className="message-content">
-                {msg.content || (msg.role === 'assistant' && isLoading && index === messages.length - 1 ? (
-                  <span className="typing-indicator">正在思考...</span>
-                ) : '')}
+                {msg.content ? (
+                  msg.role === 'assistant' ? (
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw, rehypeHighlight]}
+                      className="markdown-content"
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  ) : (
+                    msg.content
+                  )
+                ) : (
+                  msg.role === 'assistant' && isLoading && index === messages.length - 1 ? (
+                    <span className="typing-indicator">正在思考...</span>
+                  ) : ''
+                )}
               </div>
             </div>
           )
@@ -253,13 +262,6 @@ const ChatInterface: React.FC = () => {
           {isLoading ? '发送中...' : '发送'}
         </button>
       </form>
-      
-      {/* 调试区域 - 仅在开发环境显示 */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{ display: 'none' }}>
-          <pre>{JSON.stringify(messages, null, 2)}</pre>
-        </div>
-      )}
     </div>
   );
 };
