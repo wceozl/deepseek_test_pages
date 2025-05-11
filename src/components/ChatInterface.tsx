@@ -216,13 +216,14 @@ const ChatInterface: React.FC = () => {
               <div className="message-content">
                 {msg.content ? (
                   msg.role === 'assistant' ? (
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw, rehypeHighlight]}
-                      className="markdown-content"
-                    >
-                      {msg.content}
-                    </ReactMarkdown>
+                    <div className="markdown-content">
+                        <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        rehypePlugins={[rehypeRaw, rehypeHighlight]}
+                        >
+                        {msg.content}
+                        </ReactMarkdown>
+                    </div>
                   ) : (
                     msg.content
                   )
