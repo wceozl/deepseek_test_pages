@@ -185,12 +185,12 @@ const ChatInterface: React.FC = () => {
     function updateAssistantMessage(content: string) {
         setMessages(prev => {
             const newMessages = [...prev];
-          if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
-            newMessages[newMessages.length - 1].content = content;
-          }
-          return newMessages;
+            if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
+                newMessages[newMessages.length - 1].content = content;
+            }
+            return newMessages;
         });
-      }
+    }
     // 处理输入变化
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setInput(e.target.value);
