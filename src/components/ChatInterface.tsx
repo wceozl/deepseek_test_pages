@@ -48,6 +48,8 @@ const ChatInterface: React.FC = () => {
         .filter(msg => msg.role !== 'system' || messages.indexOf(msg) === 0)
         .concat(userMessage);
       
+      console.log('发送消息到API:', apiMessages);
+      
       // 使用流式 API
       const response = await fetch('https://api.glyphscript.site/chat/stream', {
         method: 'POST',
@@ -61,40 +63,61 @@ const ChatInterface: React.FC = () => {
         throw new Error(`API 错误: ${response.status}`);
       }
       
+      if (!response.body) {
+        throw new Error('响应没有提供数据流');
+      }
+      
       // 处理流式响应
-      const reader = response.body!.getReader();
+      const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       
       // 添加一个空的助手消息
       setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
       
       let accumulatedContent = '';
+      let buffer = '';  // 缓冲区处理不完整的数据
+      
+      console.log('开始读取流');
       
       while (true) {
         const { done, value } = await reader.read();
         
         if (done) {
+          console.log('流读取完成');
           break;
         }
         
         // 解码数据块
         const chunk = decoder.decode(value, { stream: true });
+        console.log('收到数据块');
         
-        // 处理 SSE 格式的数据
-        const lines = chunk.split('\n');
+        // 将新数据添加到缓冲区
+        buffer += chunk;
+        
+        // 处理缓冲区中的完整行
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // 保留最后一个可能不完整的行
+        
         let hasNewContent = false;
+        let currentContent = accumulatedContent;
         
         for (const line of lines) {
+          if (line.trim() === '') continue;
+          
           if (line.startsWith('data: ')) {
-            const data = line.slice(5);
+            const data = line.slice(5).trim();
             
             // 检查是否为流式响应结束标记
-            if (data === '[DONE]') continue;
+            if (data === '[DONE]') {
+              console.log('收到流结束标记');
+              continue;
+            }
             
             try {
               const parsedData = JSON.parse(data);
               
               if (parsedData.error) {
+                console.error('API返回错误:', parsedData.error);
                 setError(`错误: ${parsedData.error}`);
                 continue;
               }
@@ -102,30 +125,41 @@ const ChatInterface: React.FC = () => {
               if (parsedData.choices && parsedData.choices[0]) {
                 const { delta } = parsedData.choices[0];
                 
-                if (delta.content) {
+                if (delta && delta.content) {
                   accumulatedContent += delta.content;
+                  currentContent = accumulatedContent;
                   hasNewContent = true;
                 }
               }
             } catch (e) {
-              console.error('解析数据时出错:', e, data);
+              console.error('解析JSON数据出错:', e);
             }
           }
         }
         
-        // 从循环中提取出来，只在有新内容时更新消息
+        // 避免在循环中更新状态，防止ESLint错误
         if (hasNewContent) {
-          const currentContent = accumulatedContent; // 捕获当前值
+          // 捕获当前内容，避免闭包问题
+          const content = currentContent;
           setMessages(prev => {
             const newMessages = [...prev];
-            newMessages[newMessages.length - 1].content = currentContent;
+            newMessages[newMessages.length - 1].content = content;
             return newMessages;
           });
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '发送消息时出错');
       console.error('聊天错误:', err);
+      setError(err instanceof Error ? err.message : '发送消息时出错');
+      
+      // 如果已经添加了助手消息，但发生了错误，删除空消息
+      setMessages(prev => {
+        const lastMessage = prev[prev.length - 1];
+        if (lastMessage && lastMessage.role === 'assistant' && !lastMessage.content) {
+          return prev.slice(0, -1);
+        }
+        return prev;
+      });
     } finally {
       setIsLoading(false);
     }
