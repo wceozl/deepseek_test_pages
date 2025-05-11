@@ -82,6 +82,7 @@ const ChatInterface: React.FC = () => {
         
         // 处理 SSE 格式的数据
         const lines = chunk.split('\n');
+        let hasNewContent = false;
         
         for (const line of lines) {
           if (line.startsWith('data: ')) {
@@ -103,19 +104,23 @@ const ChatInterface: React.FC = () => {
                 
                 if (delta.content) {
                   accumulatedContent += delta.content;
-                  
-                  // 更新助手消息
-                  setMessages(prev => {
-                    const newMessages = [...prev];
-                    newMessages[newMessages.length - 1].content = accumulatedContent;
-                    return newMessages;
-                  });
+                  hasNewContent = true;
                 }
               }
             } catch (e) {
               console.error('解析数据时出错:', e, data);
             }
           }
+        }
+        
+        // 从循环中提取出来，只在有新内容时更新消息
+        if (hasNewContent) {
+          const currentContent = accumulatedContent; // 捕获当前值
+          setMessages(prev => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1].content = currentContent;
+            return newMessages;
+          });
         }
       }
     } catch (err) {
